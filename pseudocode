@@ -1,0 +1,35 @@
+LOSS_THRESHOLD = 80
+GOAL_CHANCE_FINISH = 0.15 (15%)
+PROBABILIDADES_ACCION:
+  Zona 0-25: {KEEP_BALL: 0.6, PROGRESS: 0.3, GO_BACK: 0.1}
+  Zona 25-60: {KEEP_BALL: 0.4, PROGRESS: 0.3, DANGEROUS_ACTION: 0.2, FINISH: 0.1}
+  Zona 60-100: {PROGRESS: 0.2, DANGEROUS_ACTION: 0.3, FINISH: 0.5}
+
+
+
+Funcion ProcessPossession() {
+
+    
+
+}
+
+
+
+
+
+
+INICIO_PARTIDO
+  Sorteo → equipo A saca en field_progress = 50
+  home_possession = true
+  
+  Mientras match_time < 90 minutos:
+    ProcessPossession()
+    
+    Si hubo gol:
+      Actualizar marcador
+      Reiniciar posesión desde mitad de cancha
+    
+    Si terminó la posesión sin gol:
+      Elegir equipo que saca (aleatorio, ~50/50)
+      
+  FIN_PARTIDO
