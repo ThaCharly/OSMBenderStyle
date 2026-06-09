@@ -7,10 +7,173 @@ PROBABILIDADES_ACCION:
 
 
 
-Funcion ProcessPossession() {
+Funcion ProcessPossession()
+{
+    Mientras verdadero:
+        // Seleccionar acción según posición actual
+        accion = ElegirAccion(field_progress)
+        
+        // Aplicar efectos de la acción
+        accumulated_exposure += accion.exposicion
+        field_progress += accion.delta_progreso
+        rival_presion += accion.delta_presion
+        
+        // Verificar si se perdió posesión por acumulación
+        Si (accumulated_exposure + rival_presion) >= LOSS_THRESHOLD:
+            return  // posesión terminada, robo del rival
+        
+        // Verificar gol en FINISH
+        Si accion == FINISH Y Random() < GOAL_CHANCE_FINISH:
+            MarcarGol()
+            return  // posesión terminada tras gol
+        
+        // Si llegó al arco rival sin definir, mantenerse cerca
+        Si field_progress >= 100:
+            field_progress = 95
+}
 
+Funcion ElegirAccion(field_progress)
+{
+    // Zona 0-25 (propia mitad, cerca del propio arco):
+    Si field_progress <= 25:
+        roll = Random(0.0, 1.0)
+        Si roll < 0.6: retornar KEEP_BALL      // 60% mantener
+        Si roll < 0.9: retornar PROGRESS       // 30% progresar
+        Retornar GO_BACK                        // 10% retroceder
     
+    // Zona 25-60 (mediocampo y entrada a campo rival):
+    Si field_progress <= 60:
+        roll = Random(0.0, 1.0)
+        Si roll < 0.4: retornar KEEP_BALL       // 40% mantener
+        Si roll < 0.7: retornar PROGRESS       // 30% progresar
+        Si roll < 0.9: retornar DANGEROUS_ACTION // 20% peligroso
+        Retornar FINISH                          // 10% finalizar
+    
+    // Zona 60-100 (campo rival, cerca del arco rival):
+    roll = Random(0.0, 1.0)
+    Si roll < 0.2: retornar PROGRESS           // 20% progresar
+    Si roll < 0.5: retornar DANGEROUS_ACTION   // 30% peligroso
+    Retornar FINISH                             // 50% finalizar
+}
 
+Funcion DefinirAcciones()
+{
+    acciones = {
+        GO_BACK: {
+            exposicion: -5,
+            delta_progreso: -10,
+            delta_presion: Random(-10, 10)  // varía según contexto
+        },
+        
+        KEEP_BALL: {
+            exposicion: 5,
+            delta_progreso: 5,
+            delta_presion: 10
+        },
+        
+        PROGRESS: {
+            exposicion: 15,
+            delta_progreso: 20,
+            delta_presion: 12
+        },
+        
+        DANGEROUS_ACTION: {
+            exposicion: 35,
+            delta_progreso: 40,
+            delta_presion: 25
+        },
+        
+        FINISH: {
+            exposicion: 50,
+            goal_chance: 0.15,
+            delta_presion: 30
+        }
+    }
+    
+    retornar acciones
+}
+
+Funcion MarcarGol()
+{
+    Si home_possession:
+        home_score++
+    Sino:
+        away_score++
+    
+    // Reiniciar posesión desde mitad de cancha para el rival
+    field_progress = 50
+    accumulated_exposure = 0
+    rival_presion = 0
+    
+    // El rival saca (quien recibió el gol)
+    home_possession = !home_possession
+}
+
+Funcion SimularPartido()
+{
+    // Inicializar equipo y marcador
+    home_score = 0
+    away_score = 0
+    match_time = 0
+    
+    // Sorteo inicial — equipo A saca en mitad de cancha
+    Si Random(0.0, 1.0) > 0.5:
+        home_possession = verdadero
+    Sino:
+        home_possession = falso
+    
+    field_progress = 50
+    accumulated_exposure = 0
+    rival_presion = 0
+    
+    // Cargar definiciones de acciones
+    acciones = DefinirAcciones()
+    
+    Mientras match_time < 90:
+        
+        // Procesar posesión hasta que termine
+        Mientras verdadero:
+            
+            accion = ElegirAccion(field_progress)
+            efectos = acciones[accion]
+            
+            accumulated_exposure += efectos.exposicion
+            field_progress += efectos.delta_progreso
+            rival_presion += efectos.delta_presion
+            
+            // Verificar si se perdió posesión por acumulación
+            Si (accumulated_exposure + rival_presion) >= LOSS_THRESHOLD:
+                Salir del bucle interno  // robo del rival
+                
+            // Verificar gol en FINISH
+            Si accion == FINISH Y Random(0.0, 1.0) < GOAL_CHANCE_FINISH:
+                MarcarGol()
+                Salir del bucle interno  // posesión terminada tras gol
+            
+            // Si llegó al arco rival sin definir, mantenerse cerca
+            Si field_progress >= 100:
+                field_progress = 95
+        
+        // Verificar si hubo gol (terminó la posesión)
+        Si accion == FINISH Y hubo_gol:
+            // Ya se marcó en MarcarGol(), pasar al siguiente
+            Continuar
+        Sino:
+            // Posesión terminada sin gol — elegir quién saca
+            Si Random(0.0, 1.0) > 0.5:
+                home_possession = verdadero
+            Sino:
+                home_possession = falso
+            
+            // Reiniciar posesión desde mitad de cancha
+            field_progress = 50
+            accumulated_exposure = 0
+            rival_presion = 0
+        
+        // Avanzar tiempo (simulado)
+        match_time += Random(1, 3)  // avanza entre 1 y 3 minutos por posesión
+    
+    Retornar {home_score, away_score}
 }
 
 
