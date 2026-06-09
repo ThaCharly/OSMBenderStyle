@@ -229,7 +229,7 @@ MatchContext SimulateMatch(Team home, Team away)
             ctx.accumulated_exposure = 0;
             ctx.rival_pressure = 0;
         }
-        else if (ctx.possession_lost) {
+        /*else if (ctx.possession_lost) {
             // Elegir equipo que saca (aleatorio, ~50/50)
             ctx.home_possession = Random(0.0, 1.0) > 0.5;
             
@@ -237,7 +237,7 @@ MatchContext SimulateMatch(Team home, Team away)
             ctx.field_progress = 50;
             ctx.accumulated_exposure = 0;
             ctx.rival_pressure = 0;
-        }
+        } */ // comenté ésto PORQUE NO ES LO QUE QUIERO. En caso de un gol sí que el equipo que se comió el gol saca del medio. Pero en caso de perder la posesión por umbral, saca el equipo que la recuperó desde el lugar que la recuperó. El equipo que la tenía antes la tenía en 85? Entonces el rival que recuperó saca desde 15. 75? 25. Y así con todo.
         
         // Avanzar tiempo (simulado)
         ctx.match_time += RollTimeAdvance();

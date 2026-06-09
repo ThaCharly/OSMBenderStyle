@@ -60,9 +60,9 @@ Funcion DefinirAcciones()
 {
     acciones = {
         GO_BACK: {
-            exposicion: -5,
+            exposicion: -10,
             delta_progreso: -10,
-            delta_presion: Random(-10, 10)  // varía según contexto
+            delta_presion: 10   // más adelante variará dependiendo el contexto, las tacticas, etc, pudiendo incluso ser negativo
         },
         
         KEEP_BALL: {
@@ -100,7 +100,7 @@ Funcion MarcarGol()
     Sino:
         away_score++
     
-    // Reiniciar posesión desde mitad de cancha para el rival
+    // Quien recibió el gol saca desde mitad de cancha
     field_progress = 50
     accumulated_exposure = 0
     rival_presion = 0
