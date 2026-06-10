@@ -1,4 +1,4 @@
-# DOCUMENTO DE ARQUITECTURA — FOOTBALL MATCH ENGINE (v4)
+# DOCUMENTO DE ARQUITECTURA — OSMBenderStyle
 
 ## Filosofía Fundamental
 
@@ -108,7 +108,7 @@ DANGEROUS_ACTION:
 FINISH:
   exposición: +50
   goal_chance: 0.15 (15%)
-  rival_pressure: +30
+  rival_pressure: +30 (pero el quite de balón depende del arquero)
 ```
 
 Estos valores son iniciales. Más adelante se ajustarán con estadísticas de jugadores y presión modelada. Por ahora son constantes fijas.
@@ -132,7 +132,7 @@ Esto genera comportamientos emergentes:
 
 - Una secuencia `GO_BACK, GO_BACK, KEEP_BALL, GO_BACK` reduce activamente el riesgo acumulado — es legítima
 - Una secuencia larga de progresiones acumulando exposición inevitablemente termina en pérdida
-- El rival presiona mientras dura la posesión; si no avanzás lo suficiente, te roban
+- El rival presiona mientras dura la posesión; si no avanzás lo suficiente, te roban. El rival puede decidir presionar aún más para quitar el balón y evitar 90 minutos de posesión ajena.
 
 ---
 
@@ -163,7 +163,7 @@ void ProcessPossession(MatchContext& ctx)
         
         // Si llegó al arco rival sin definir, mantenerse cerca
         if (ctx.field_progress >= 100) {
-            ctx.field_progress = 95;
+            // acá pueden pasar varias cosas, quizás pierden la pelota del todo, quizás vuelven atrás
         }
     }
 }
@@ -197,6 +197,8 @@ ActionDefinition SelectAction(int32_t field_progress)
     auto roll = Random(0.0, 1.0);
     if (roll < 0.2) return PROGRESS;           // 20% progresar
     if (roll < 0.5) return DANGEROUS_ACTION;   // 30% peligroso
+    if (roll < 0.7 return
+GO_BACK // -10% peligroso
     return FINISH;                              // 50% finalizar
 }
 ```
